@@ -20,3 +20,6 @@ The report includes the initial form's public metadata, hidden-field names (neve
 The next implementation step is to reproduce the ordinary Aceptar button behavior, identify the exact TIE fingerprint procedure option, and then inspect the post-procedure screen for office choices or an explicit no-appointments message.
 
 No office is selected by this diagnostic.
+
+
+The inspector stores the public portal JavaScript file as a temporary GitHub Actions artifact for analysis. It contains no session cookies or hidden form values.
