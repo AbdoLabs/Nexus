@@ -8,9 +8,8 @@ fingerprint appointment availability in the Community of Madrid.
 ## Search strategy agreed for Nexus
 
 - Search Madrid for the TIE fingerprint procedure.
-- Do not preselect a specific police station/office.
-- Continue the broad search using the portal's general/all-offices choice
-  only where the portal requires that wildcard.
+- Do not choose a named police station/office.
+- Use the portal's **Cualquier oficina** option as the all-offices wildcard.
 - If the portal then displays an office-selection screen with office choices,
   record the displayed offices as the positive availability signal.
 - If it displays an explicit no-appointments message, record no availability.
