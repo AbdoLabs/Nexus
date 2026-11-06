@@ -1,6 +1,6 @@
 # Running the portal form probe
 
-The first live inspection is deliberately manual. It opens the official portal
+The first live inspection uses the alternate SSWEB ICP+ endpoint linked to the same public appointment service. It opens the official portal
 once, reads the initial form structure and visible text, and uploads a diagnostic
 artifact. It does not enter identity data or submit a reservation.
 
