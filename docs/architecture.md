@@ -8,17 +8,33 @@ fingerprint appointment availability in the Community of Madrid.
 ## Search strategy agreed for Nexus
 
 - Search Madrid for the TIE fingerprint procedure.
-- Do not select or submit an office at the search stage.
-- If appointments are available, read the office choices from the next screen.
-- If the portal then displays an office-selection screen with office choices,
-  record the displayed offices as the positive availability signal.
-- If it displays an explicit no-appointments message, record no availability.
-- If it displays a CAPTCHA, access-denied page, loading error, or an unfamiliar
-  response, report an unknown/manual-intervention state instead of claiming
-  that no appointments exist.
+- The initial form/screen may show an office selector containing **all offices**.
+  This is only the initial input screen and is never evidence that appointments
+  are available.
+- Preserve the province-level search: do not narrow the search to a specific
+  office when the portal allows the search to proceed without one.
+- After submitting the initial search, distinguish the next screen carefully:
+  - If the portal displays a **second office-selection screen containing only
+    offices with available appointments**, record those offices and report
+    availability. This filtered post-search screen is the positive signal.
+  - If the portal displays the explicit message
+    "En este momento no hay citas disponibles", report no availability.
+  - If it displays a CAPTCHA, access-denied page, loading error, or unfamiliar
+    response, report an unknown/manual-intervention state.
+- Never classify the initial all-offices selector as availability.
+- Never infer availability merely because the portal loaded or because any
+  generic office selector exists.
 
 Nexus should make one province-level query, not one query per municipality.
-The office list is taken from the live response, not hard-coded.
+For the positive result, capture office names from the **filtered second
+selector**, not from the initial all-offices list. Do not hard-code office names.
+
+## Evidence from the first local inspection
+
+The local inspection at 2026-11-06 18:40 Europe/Madrid reached
+`/icpplustiem/acCitarB` and displayed the explicit no-appointments message.
+That report did not include visible select elements. It confirms the negative
+message path, but does not yet document the filtered positive office selector.
 
 ## Current implementation
 
@@ -31,13 +47,14 @@ The office list is taken from the live response, not hard-coded.
 ## Not implemented yet
 
 - A supported cloud route to the official Police appointment application; the official link currently times out from GitHub-hosted runners.
-- Positive/negative availability detection on the post-search page in a live
-  portal run.
+- Browser automation of the initial search and detection of the filtered second office selector.
+- Positive availability detection confirmed with a captured real example of the second selector.
 - Availability persistence and duplicate alert suppression.
 - Telegram notification policy connected to detected availability.
 - Dashboard and health status.
 - Scheduled production monitoring.
 
-The monitor must never report a successful availability check merely because
-the portal loaded. Only the explicit post-search office chooser or explicit
-no-appointments message are meaningful availability outcomes.
+The monitor must treat the portal as a state machine. The initial all-offices
+selector is a search input, not an availability result. Only the filtered
+post-search office selector or the explicit no-appointments message are
+meaningful availability outcomes.
