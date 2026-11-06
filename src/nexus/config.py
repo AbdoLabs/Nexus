@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Official ICP+ entry point currently used for appointment requests.
+# Portal route verified from the current ICP+ appointment service listing.
 DEFAULT_PORTAL_URL = "https://citaprevia.administracionelectronica.gob.es/icpplus/citar"
 
 
