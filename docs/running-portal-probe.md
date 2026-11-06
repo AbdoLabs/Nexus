@@ -30,3 +30,6 @@ we have confirmed the portal's actual form flow and a reasonable request rate.
 ## Current form discovery
 
 The initial page exposes a province selector and an Aceptar control. The read-only inspector records the Madrid option and inspects the public static scripts for the follow-on navigation logic; no personal information or booking data is submitted.
+
+
+Script diagnostics were refined to omit session identifiers and hidden input values.
