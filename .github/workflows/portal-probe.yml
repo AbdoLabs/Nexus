@@ -32,21 +32,20 @@ jobs:
         run: python -m pip install -r requirements.txt
 
       - name: Install Chromium
-        run: python -m playwright install chromium --only-shell
-
-      - name: Inspect official ICP+ portal form (read-only)
+        run: 
+      - name: Inspect ICP+ form structure via HTTP (read-only)
         env:
           PYTHONPATH: src
           APP_ENV: production
           LOG_LEVEL: INFO
           TIMEZONE: Europe/Madrid
-        run: python -m nexus.portal_probe
+        run: python -m nexus.route_probe
 
       - name: Upload diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-portal-probe
+          name: nexus-http-inspection
           path: artifacts/
           if-no-files-found: warn
           retention-days: 5
