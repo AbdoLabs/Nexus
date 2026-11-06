@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEFAULT_PORTAL_URL = "https://icp.administracionelectronica.gob.es/icpplus/index.html"
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -19,12 +21,15 @@ class Settings:
     telegram_chat_id: str = os.getenv("TELEGRAM_CHAT_ID", "")
     province: str = os.getenv("PROVINCE", "Madrid")
     appointment_procedure: str = os.getenv(
-        "APPOINTMENT_PROCEDURE", "TOMA DE HUELLAS"
+        "APPOINTMENT_PROCEDURE",
+        "POLICIA - TOMA DE HUELLA (EXPEDICIÓN DE TARJETA), "
+        "RENOVACIÓN DE TARJETA DE LARGA DURACIÓN y DUPLICADO",
     )
     office_selection: str = os.getenv("OFFICE_SELECTION", "Cualquier oficina")
     check_interval_minutes: int = int(
         os.getenv("CHECK_INTERVAL_MINUTES", "5")
     )
+    portal_url: str = os.getenv("PORTAL_URL", DEFAULT_PORTAL_URL)
 
 
 settings = Settings()
@@ -38,3 +43,5 @@ def validate_settings() -> None:
         raise ValueError("PROVINCE cannot be empty.")
     if not settings.appointment_procedure.strip():
         raise ValueError("APPOINTMENT_PROCEDURE cannot be empty.")
+    if not settings.portal_url.startswith("https://"):
+        raise ValueError("PORTAL_URL must use HTTPS.")
