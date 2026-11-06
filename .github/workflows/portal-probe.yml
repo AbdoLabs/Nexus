@@ -37,7 +37,7 @@ jobs:
           APP_ENV: production
           LOG_LEVEL: INFO
           TIMEZONE: Europe/Madrid
-        run: python -m nexus.route_probe
+        run: python -m nexus.candidate_probe
 
       - name: Upload diagnostic report
         if: always()
