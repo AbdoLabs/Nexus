@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - .github/workflows/portal-probe.yml
+      - src/nexus/config.py
   workflow_dispatch:
 
 permissions:
