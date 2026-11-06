@@ -52,6 +52,47 @@ def classify_visible_text(text: str) -> str:
     return "unknown_or_loading"
 
 
+
+
+def extract_office_options(frames: list[dict[str, Any]]) -> list[str]:
+    """Extract choices from a visible office selector, if the portal shows one."""
+    options: list[str] = []
+    placeholders = {
+        "", "0", "-1", "seleccionar ...", "seleccione ...",
+        "seleccionar", "seleccione", "elija", "elige",
+        "--", "---", "cualquier oficina",
+    }
+    for frame in frames:
+        for select in frame.get("selects", []):
+            label = " ".join(
+                str(select.get(key, "")) for key in ("label", "id", "name")
+            ).casefold()
+            if not select.get("visible") or "oficina" not in label:
+                continue
+            for option in select.get("options", []):
+                value = str(option.get("value", "")).strip()
+                name = str(option.get("label", "")).strip()
+                if option.get("disabled") or name.casefold() in placeholders:
+                    continue
+                if value and name and name not in options:
+                    options.append(name)
+    return options
+
+
+def classify_portal_result(frames: list[dict[str, Any]], text: str) -> str:
+    """Classify explicit no-slot text or the office chooser shown after a broad search."""
+    normalized = re.sub(r"\\s+", " ", text or "").casefold()
+    if any(pattern in normalized for pattern in CHALLENGE_PATTERNS):
+        return "manual_intervention_required"
+    if any(pattern in normalized for pattern in NO_APPOINTMENT_PATTERNS):
+        return "no_appointments_message"
+    if extract_office_options(frames):
+        return "office_selection_available"
+    if "internet cita previa" in normalized or "cita previa" in normalized:
+        return "appointment_portal_loaded"
+    return "unknown_or_loading"
+
+
 def _frame_snapshot(frame: Any, index: int) -> dict[str, Any]:
     """Return visible metadata for selects, options, headings and safe form shape."""
     data = frame.evaluate(
@@ -117,6 +158,7 @@ def build_report() -> dict[str, Any]:
         "page_title": None,
         "state": "not_started",
         "frames": [],
+        "office_options": [],
         "error": None,
         "safety": {
             "read_only": True,
@@ -163,7 +205,8 @@ def build_report() -> dict[str, Any]:
             visible_text = " ".join(
                 str(frame.get("body_text", "")) for frame in report["frames"]
             )
-            report["state"] = classify_visible_text(visible_text)
+            report["office_options"] = extract_office_options(report["frames"])
+            report["state"] = classify_portal_result(report["frames"], visible_text)
             if report["http_status"] and report["http_status"] >= 400:
                 report["state"] = "http_error"
             os.makedirs("artifacts", exist_ok=True)
