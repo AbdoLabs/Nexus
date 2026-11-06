@@ -1,25 +1,25 @@
-# Portal form probe
+# Official ICP+ endpoint diagnostic
 
-The diagnostic reaches the public ICP+ form and submits the Madrid province
-selection only. It keeps hidden form fields and cookies in memory for the single
-HTTP session; it does not save them in the report or repository.
-
-It does not submit a person's identity information, select a police office,
-select a time slot, reserve, or cancel an appointment.
+This workflow compares documented entry points using HTTP GET only. It does
+not submit a form, select a province, choose an office, or make a booking.
 
 ## Run
 
 1. Open the [Portal Form Probe workflow](https://github.com/AbdoLabs/Nexus/actions/workflows/portal-probe.yml).
 2. Choose **Run workflow** on branch `main`.
-3. Download the `nexus-http-inspection` artifact from the completed run.
+3. Download the `nexus-http-inspection` artifact.
 
-## What to inspect
+## Current findings
 
-The candidate probe performs GET-only checks against the Police-linked ICP+ address, the current cita-prequeued hostname, and official Sede aliases. It compares public form labels and redirects without submitting any data. This helps isolate the correct Police appointment portal before proceeding.
+- The National Police links applicants to
+  `https://icp.administracionelectronica.gob.es/icpplus/index.html`.
+- GitHub-hosted runners currently time out when connecting to that hostname.
+- The alternate SSWEB endpoint served Education procedures for Madrid, not
+  Police fingerprint appointments, and is therefore not used by Nexus.
+- Other Sede aliases returned a general landing page, HTTP 403 or HTTP 503
+  from the GitHub runner.
 
-The next implementation step is to reproduce the ordinary Aceptar button behavior, identify the exact TIE fingerprint procedure option, and then inspect the post-procedure screen for office choices or an explicit no-appointments message.
-
-No office is selected by this diagnostic.
-
-
-The inspector stores the public portal JavaScript file as a temporary GitHub Actions artifact for analysis. It contains no session cookies or hidden form values.
+Until a cloud runner can reach the correct Police application, Nexus must not
+claim that it checked appointment availability. The next useful diagnostic is
+to open the official link in a normal browser, select Madrid, and inspect the
+procedure screen without entering identity details or choosing a time.
