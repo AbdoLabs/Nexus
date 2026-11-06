@@ -1,12 +1,6 @@
 name: Portal Form Probe
 
 on:
-  # One-shot self-triggered inspection when this workflow definition is added/updated.
-  # Remove the push trigger after the first diagnostic run to avoid repeated browser setup.
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/portal-probe.yml
   workflow_dispatch:
 
 permissions:
