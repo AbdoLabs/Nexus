@@ -137,15 +137,15 @@ def build_report() -> dict[str, Any]:
         try:
             response = page.goto(
                 settings.portal_url,
-                wait_until="domcontentloaded",
-                timeout=60000,
+                wait_until="commit",
+                timeout=30000,
             )
             report["http_status"] = response.status if response else None
             try:
-                page.wait_for_load_state("networkidle", timeout=12000)
+                page.wait_for_load_state("domcontentloaded", timeout=10000)
             except PlaywrightTimeoutError:
                 logger.info("Portal did not become network-idle; continuing with DOM snapshot.")
-            page.wait_for_timeout(3500)
+            page.wait_for_timeout(2000)
 
             report["final_url"] = page.url
             report["page_title"] = page.title()
