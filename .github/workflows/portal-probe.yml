@@ -1,6 +1,12 @@
 name: Portal Form Probe
 
 on:
+  # One-shot self-triggered inspection when this workflow definition is added/updated.
+  # Remove the push trigger after the first diagnostic run to avoid repeated browser setup.
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/portal-probe.yml
   workflow_dispatch:
 
 permissions:
@@ -13,7 +19,7 @@ concurrency:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
