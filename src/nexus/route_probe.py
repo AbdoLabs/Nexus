@@ -168,6 +168,8 @@ def inspect_portal() -> dict[str, Any]:
         "initial_page_title": None,
         "initial_selects": [],
         "initial_buttons": [],
+        "initial_forms": [],
+        "javascript_probe": [],
         "province_step": {
             "madrid_found": False,
             "madrid_value": None,
@@ -215,6 +217,75 @@ def inspect_portal() -> dict[str, Any]:
         report["initial_page_title"] = title
         report["initial_selects"] = _safe_selects(parser)
         report["initial_buttons"] = parser.buttons
+        report["initial_forms"] = [
+            {
+                "id": item.get("id", ""),
+                "name": item.get("name", ""),
+                "method": item.get("method", ""),
+                "action": _safe_url(urljoin(first.url, item.get("action", ""))),
+                "hidden_field_count": len(
+                    parser.hidden_fields_by_form.get(
+                        item.get("name") or item.get("id"), []
+                    )
+                ),
+                "hidden_field_names": [
+                    name for name, _ in parser.hidden_fields_by_form.get(
+                        item.get("name") or item.get("id"), []
+                    )
+                ],
+            }
+            for item in parser.forms
+        ]
+
+        # Fetch the public page script with the same HTTP session. Its raw URL
+        # may contain a session path parameter; never include that in reports.
+        for script_src in parser.scripts:
+            if "portada_pt.min.js" not in script_src:
+                continue
+            script_url = urljoin(first.url, script_src)
+            try:
+                js_response = session.get(
+                    script_url,
+                    headers=headers,
+                    timeout=(8, 35),
+                    stream=True,
+                )
+                chunks = []
+                total = 0
+                for chunk in js_response.iter_content(chunk_size=16384):
+                    if not chunk:
+                        continue
+                    chunks.append(chunk)
+                    total += len(chunk)
+                    if total >= 1_500_000:
+                        break
+                js = b"".join(chunks).decode(
+                    js_response.encoding or "utf-8", errors="replace"
+                )
+                snippets = []
+                for term in (
+                    "btnAceptar", "portadaForm", "provincia", "subtramite",
+                    "alert_captcha", "method", "acInfo",
+                ):
+                    matches = list(re.finditer(re.escape(term), js, re.I))[:4]
+                    for match in matches:
+                        snippets.append({
+                            "term": term,
+                            "context": js[max(0, match.start()-350):match.end()+650],
+                        })
+                report["javascript_probe"].append({
+                    "script": _safe_url(script_url),
+                    "status_code": js_response.status_code,
+                    "bytes_read": total,
+                    "snippets": snippets,
+                    "error": None,
+                })
+            except requests.RequestException as exc:
+                report["javascript_probe"].append({
+                    "script": _safe_url(script_url),
+                    "error": f"{type(exc).__name__}: {str(exc)[:250]}",
+                })
+            break
 
         province_control = next(
             (item for item in parser.selects if item["name"] == "provincia"),
