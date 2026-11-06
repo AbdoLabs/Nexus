@@ -10,6 +10,9 @@ class ConfigTests(unittest.TestCase):
     def test_default_region_is_madrid(self) -> None:
         self.assertEqual(settings.province, "Madrid")
 
+    def test_default_office_mode_is_all_offices(self) -> None:
+        self.assertEqual(settings.office_selection, "Cualquier oficina")
+
     def test_default_procedure_is_fingerprint_collection(self) -> None:
         self.assertIn("TOMA DE HUELLA", settings.appointment_procedure)
 
