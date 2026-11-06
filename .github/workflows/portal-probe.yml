@@ -1,4 +1,4 @@
-name: ICP+ Route Probe
+name: Portal Form Probe
 
 on:
   push:
@@ -34,19 +34,19 @@ jobs:
       - name: Install Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Inspect official portal form (read-only)
+      - name: Inspect official ICP+ portal form (read-only)
         env:
           PYTHONPATH: src
           APP_ENV: production
           LOG_LEVEL: INFO
           TIMEZONE: Europe/Madrid
-        run: python -m nexus.route_probe
+        run: python -m nexus.portal_probe
 
       - name: Upload diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-route-probe
+          name: nexus-portal-probe
           path: artifacts/
           if-no-files-found: warn
           retention-days: 5
