@@ -24,13 +24,13 @@ The office list is taken from the live response, not hard-coded.
 
 - Environment-based configuration and official portal URL.
 - Telegram notification helper (credentials remain secret).
-- An HTTP form probe that fetches the initial form and submits only the Madrid province choice to expose the procedure screen. Hidden values and session cookies remain in memory only.
+- A GET-only endpoint diagnostic that compares the official Police ICP+ URL with documented Sede aliases. The SSWEB Education route was excluded after it returned Education-only procedures.
 - A manually triggered GitHub Actions diagnostic workflow.
 - GitHub Actions CI and unit tests.
 
 ## Not implemented yet
 
-- Confirmed selection of the TIE fingerprint procedure and the resulting availability/office-selection screen.
+- A supported cloud route to the official Police appointment application; the official link currently times out from GitHub-hosted runners.
 - Positive/negative availability detection on the post-search page in a live
   portal run.
 - Availability persistence and duplicate alert suppression.
