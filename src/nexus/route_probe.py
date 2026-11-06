@@ -339,7 +339,9 @@ def inspect_portal() -> dict[str, Any]:
             # This transition sends Madrid only. Hidden anti-CSRF/session fields
             # stay inside this request and are never copied into the report.
             payload = hidden_fields + [("provincia", madrid["value"])]
-            action = urljoin(first.url, form.get("action") or first.url)
+            # The portal JavaScript changes the form action to selectProvincia
+            # when a province is selected, then submits the same session form.
+            action = urljoin(first.url, "selectProvincia")
             next_response = session.post(
                 action,
                 data=payload,
@@ -350,6 +352,7 @@ def inspect_portal() -> dict[str, Any]:
             next_parser, next_title = _parse_response(next_response)
             report["province_step"].update({
                 "submitted": True,
+                "action": _safe_url(action),
                 "http_status": next_response.status_code,
                 "final_url": _safe_url(next_response.url),
                 "page_title": next_title,
