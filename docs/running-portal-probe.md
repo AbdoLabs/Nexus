@@ -15,7 +15,7 @@ select a time slot, reserve, or cancel an appointment.
 
 ## What to inspect
 
-The report includes the initial form's public metadata, hidden-field names (never values), and snippets from the public JavaScript submit handler. It also records the response to the Madrid-only transition. A session-expired response is a form-flow diagnostic, not a no-appointments result.
+The form submit handler changes the action to selectProvincia when Madrid is chosen. The probe now follows that exact province-only transition using the existing HTTP session. It records the next screen's public form controls and visible text; no office or appointment is selected.
 
 The next implementation step is to reproduce the ordinary Aceptar button behavior, identify the exact TIE fingerprint procedure option, and then inspect the post-procedure screen for office choices or an explicit no-appointments message.
 
