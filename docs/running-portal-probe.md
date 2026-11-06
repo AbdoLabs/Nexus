@@ -15,7 +15,7 @@ select a time slot, reserve, or cancel an appointment.
 
 ## What to inspect
 
-The form submit handler changes the action to selectProvincia when Madrid is chosen. The probe now follows that exact province-only transition using the existing HTTP session. It records the next screen's public form controls and visible text; no office or appointment is selected.
+The candidate probe performs GET-only checks against the Police-linked ICP+ address, the current cita-prequeued hostname, and official Sede aliases. It compares public form labels and redirects without submitting any data. This helps isolate the correct Police appointment portal before proceeding.
 
 The next implementation step is to reproduce the ordinary Aceptar button behavior, identify the exact TIE fingerprint procedure option, and then inspect the post-procedure screen for office choices or an explicit no-appointments message.
 
