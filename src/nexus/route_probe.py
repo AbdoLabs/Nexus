@@ -121,6 +121,7 @@ def inspect_portal() -> dict[str, Any]:
         "inputs": [],
         "buttons": [],
         "external_scripts": [],
+        "script_inspection": [],
         "markers": [],
         "error": None,
         "privacy": {
@@ -194,6 +195,7 @@ def main() -> int:
             for s in report["selects"]
         ],
         "buttons": report["buttons"],
+        "script_inspection": report["script_inspection"],
         "error": report["error"],
     }, ensure_ascii=False, indent=2))
     return 0
