@@ -25,3 +25,8 @@ artifact. It does not enter identity data or submit a reservation.
 
 The workflow is manual-only at this stage. Do not enable frequent polling until
 we have confirmed the portal's actual form flow and a reasonable request rate.
+
+
+## Current form discovery
+
+The initial page exposes a province selector and an Aceptar control. The read-only inspector records the Madrid option and inspects the public static scripts for the follow-on navigation logic; no personal information or booking data is submitted.
