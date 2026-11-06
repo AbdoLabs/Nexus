@@ -1,13 +1,17 @@
 name: Portal Form Probe
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - docs/running-portal-probe.md
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: nexus-portal-probe
+  group: nexus-portal-probe-smoke
   cancel-in-progress: false
 
 jobs:
