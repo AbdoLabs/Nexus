@@ -1,10 +1,6 @@
 name: Portal Form Probe
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - docs/running-portal-probe.md
   workflow_dispatch:
 
 permissions:
