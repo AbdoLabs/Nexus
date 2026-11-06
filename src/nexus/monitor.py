@@ -19,11 +19,10 @@ def run_check() -> None:
     """Run one scaffold check."""
     validate_settings()
     logger.info(
-        "Nexus scaffold ready at %s | province=%s | procedure=%s | office=%s",
+        "Nexus scaffold ready at %s | province=%s | procedure=%s | office=not preselected",
         datetime.now(timezone.utc).isoformat(),
         settings.province,
         settings.appointment_procedure,
-        settings.office_selection,
     )
     logger.warning(
         "No appointment search was performed: portal adapter is pending."
