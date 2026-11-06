@@ -15,10 +15,8 @@ select a time slot, reserve, or cancel an appointment.
 
 ## What to inspect
 
-The report includes the procedure selector and its public option labels after
-the Madrid-only form transition. The next implementation step can then identify
-the exact TIE fingerprint procedure option. Only after confirming that option
-will we submit that procedure and inspect the next screen for the office list
-or an explicit no-appointments message.
+The report includes the initial form's public metadata, hidden-field names (never values), and snippets from the public JavaScript submit handler. It also records the response to the Madrid-only transition. A session-expired response is a form-flow diagnostic, not a no-appointments result.
+
+The next implementation step is to reproduce the ordinary Aceptar button behavior, identify the exact TIE fingerprint procedure option, and then inspect the post-procedure screen for office choices or an explicit no-appointments message.
 
 No office is selected by this diagnostic.
