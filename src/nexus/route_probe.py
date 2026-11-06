@@ -273,11 +273,16 @@ def inspect_portal() -> dict[str, Any]:
                             "term": term,
                             "context": js[max(0, match.start()-350):match.end()+650],
                         })
+                Path("artifacts").mkdir(exist_ok=True)
+                Path("artifacts/portada_pt.min.js").write_text(
+                    js, encoding="utf-8"
+                )
                 report["javascript_probe"].append({
                     "script": _safe_url(script_url),
                     "status_code": js_response.status_code,
                     "bytes_read": total,
                     "snippets": snippets,
+                    "source_artifact": "artifacts/portada_pt.min.js",
                     "error": None,
                 })
             except requests.RequestException as exc:
