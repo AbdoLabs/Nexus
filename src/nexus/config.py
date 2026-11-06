@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Entry point linked by the Spanish National Police for TIE fingerprint appointments.
-DEFAULT_PORTAL_URL = "https://icp.administracionelectronica.gob.es/icpplus/index.html"
+DEFAULT_PORTAL_URL = "https://ssweb.seap.minhap.es/icpplus/citar?locale=es"
 
 
 @dataclass(frozen=True)
