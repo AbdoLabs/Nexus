@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEFAULT_PORTAL_URL = "https://icp.administracionelectronica.gob.es/icpplus/index.html"
+DEFAULT_PORTAL_URL = "https://citaprevia.administracionelectronica.gob.es/icpplus/citar"
 
 
 @dataclass(frozen=True)
