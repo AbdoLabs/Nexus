@@ -2,49 +2,43 @@
 
 ## Purpose
 
-Nexus is a neutral project name. Its first planned use case is monitoring
-Spanish fingerprint appointment availability in the Community of Madrid.
+Nexus is a neutral project name. Its first use case is monitoring Spanish
+fingerprint appointment availability in the Community of Madrid.
+
+## Search strategy agreed for Nexus
+
+- Search Madrid for the TIE fingerprint procedure.
+- Do not preselect a specific police station/office.
+- Continue the broad search using the portal's general/all-offices choice
+  only where the portal requires that wildcard.
+- If the portal then displays an office-selection screen with office choices,
+  record the displayed offices as the positive availability signal.
+- If it displays an explicit no-appointments message, record no availability.
+- If it displays a CAPTCHA, access-denied page, loading error, or an unfamiliar
+  response, report an unknown/manual-intervention state instead of claiming
+  that no appointments exist.
+
+Nexus should make one province-level query, not one query per municipality.
+The office list is taken from the live response, not hard-coded.
 
 ## Current implementation
 
-- Environment-based configuration, including the official portal URL.
-- Telegram notification helper (credentials are optional and must remain secret).
-- A read-only Playwright portal probe that inventories visible select controls,
-  their option labels and values, page headings, frames, and visible status text.
-- Manual GitHub Actions workflow to run the portal probe and upload a short-lived
-  diagnostic artifact.
-- GitHub Actions CI for Python compilation and unit tests.
-
-## Official appointment procedure
-
-The Policía Nacional identifies the relevant TIE procedure as:
-
-`POLICIA - TOMA DE HUELLA (EXPEDICIÓN DE TARJETA), RENOVACIÓN DE TARJETA DE
-LARGA DURACIÓN y DUPLICADO`.
-
-The exact option label and available offices must be verified against the live
-portal before implementing the availability query.
-
-## Probe safety and limits
-
-The portal probe is read-only. It does not submit identity information, reserve
-or cancel appointments, solve CAPTCHAs, or bypass rate limits/access controls.
-If a CAPTCHA or access-denied page appears, the report marks it for manual
-intervention.
-
-The probe records only the page structure and visible text needed to identify
-the current form flow. It does not collect field values, cookies, browser
-storage, or personal data.
+- Environment-based configuration and official portal URL.
+- Telegram notification helper (credentials remain secret).
+- A read-only Playwright probe that inventories visible form controls and text.
+- A manually triggered GitHub Actions diagnostic workflow.
+- GitHub Actions CI and unit tests.
 
 ## Not implemented yet
 
-- Selecting Madrid and the fingerprint procedure in the live portal.
-- Enumerating every office shown by the portal and checking availability.
-- Availability persistence and duplicate detection.
-- Telegram alert policy.
+- Complete interaction with the Madrid + TIE fingerprint search form.
+- Positive/negative availability detection on the post-search page in a live
+  portal run.
+- Availability persistence and duplicate alert suppression.
+- Telegram notification policy connected to detected availability.
 - Dashboard and health status.
 - Scheduled production monitoring.
 
-The monitor must not report a successful appointment check until the official
-portal adapter has completed a real query and its response has been validated.
-GitHub scheduled workflows are best-effort, not a precise timer.
+The monitor must never report a successful availability check merely because
+the portal loaded. Only the explicit post-search office chooser or explicit
+no-appointments message are meaningful availability outcomes.
