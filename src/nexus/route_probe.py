@@ -151,9 +151,39 @@ def inspect_portal() -> dict[str, Any]:
         result["selects"] = parser.selects
         result["inputs"] = parser.inputs
         result["buttons"] = parser.buttons
+        # Sanitize per-session JSESSIONID values before writing diagnostics.
+        for form in parser.forms:
+            form["action"] = re.sub(r";jsessionid=[^?]+", "", form["action"])
         result["external_scripts"] = [
-            urljoin(response.url, src) for src in parser.scripts[:30]
+            re.sub(r";jsessionid=[^?]+", "", urljoin(response.url, src))
+            for src in parser.scripts[:30]
         ]
+        # Inspect only the public scripts that wire the initial form controls.
+        for script_url in result["external_scripts"]:
+            if not any(name in script_url for name in ("portada_pt.min.js", "icp-7.37.min.js")):
+                continue
+            try:
+                js_response = requests.get(script_url, timeout=(5, 12))
+                js = js_response.text[:2_000_000]
+                snippets = []
+                for term in ("btnAceptar", "portadaForm", "provincia", "subtramite", "acInfo"):
+                    match = re.search(re.escape(term), js, re.IGNORECASE)
+                    if match:
+                        snippets.append({
+                            "term": term,
+                            "context": js[max(0, match.start()-250):match.end()+500],
+                        })
+                result["script_inspection"].append({
+                    "script": script_url,
+                    "status_code": js_response.status_code,
+                    "length": len(js),
+                    "snippets": snippets,
+                })
+            except requests.RequestException as exc:
+                result["script_inspection"].append({
+                    "script": script_url,
+                    "error": f"{type(exc).__name__}: {str(exc)[:300]}",
+                })
         text = re.sub(r"\s+", " ", " ".join(
             part for part in response.text.split("<") if part
         ))
