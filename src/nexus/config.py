@@ -26,7 +26,6 @@ class Settings:
         "POLICIA - TOMA DE HUELLA (EXPEDICIÓN DE TARJETA), "
         "RENOVACIÓN DE TARJETA DE LARGA DURACIÓN y DUPLICADO",
     )
-    office_selection: str = os.getenv("OFFICE_SELECTION", "Cualquier oficina")
     check_interval_minutes: int = int(
         os.getenv("CHECK_INTERVAL_MINUTES", "5")
     )
