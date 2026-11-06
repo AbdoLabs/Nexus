@@ -24,7 +24,8 @@ class FormInspector(HTMLParser):
         self.forms: list[dict[str, Any]] = []
         self.selects: list[dict[str, Any]] = []
         self.inputs: list[dict[str, str]] = []
-        self.buttons: list[dict[str, str]] = []
+        self.hidden_fields: list[tuple[str, str]] = []
+        self.buttons: list[dict[str, str]] =
         self.scripts: list[str] = []
         self._current_form: dict[str, Any] | None = None
         self._current_select: dict[str, Any] | None = None
@@ -59,6 +60,8 @@ class FormInspector(HTMLParser):
             }
             self._current_select["options"].append(self._current_option)
         elif tag == "input":
+            if a.get("type", "").lower() == "hidden" and a.get("name"):
+                self.hidden_fields.append((a.get("name", ""), a.get("value", "")))
             self.inputs.append({
                 "id": a.get("id", ""),
                 "name": a.get("name", ""),
@@ -109,6 +112,14 @@ class FormInspector(HTMLParser):
 PORTAL_URL = "https://ssweb.seap.minhap.es/icpplus/citar?locale=es"
 
 
+def _parse_response(response: requests.Response) -> tuple[FormInspector, str]:
+    parser = FormInspector()
+    parser.feed(response.text[:2_000_000])
+    title = re.search(r"<title[^>]*>(.*?)</title>", response.text, re.I | re.S)
+    page_title = re.sub(r"\\s+", " ", title.group(1)).strip() if title else ""
+    return parser, page_title
+
+
 def inspect_portal() -> dict[str, Any]:
     result: dict[str, Any] = {
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -131,23 +142,87 @@ def inspect_portal() -> dict[str, Any]:
         },
     }
     try:
-        response = requests.get(
+        session = requests.Session()
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "es-ES,es;q=0.9,en;q=0.6",
+        }
+        response = session.get(
             PORTAL_URL,
             timeout=(8, 20),
             allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
-                ),
-                "Accept-Language": "es-ES,es;q=0.9,en;q=0.6",
-            },
+            headers=headers,
         )
         result["status_code"] = response.status_code
         result["final_url"] = response.url
-        parser = FormInspector()
-        parser.feed(response.text[:2_000_000])
-        result["forms"] = parser.forms
+        parser, page_title = _parse_response(response)
+        result["title"] = page_title
+        # Preserve session-only hidden fields in memory to submit the same
+        # province form as a normal user; none of these values are logged.
+        province_select = next(
+            (s for s in parser.selects if s["name"] == "provincia"), None
+        )
+        madrid_option = None
+        if province_select:
+            madrid_option = next(
+                (o for o in province_select["options"]
+                 if o["label"].strip().casefold() == "madrid"),
+                None,
+            )
+        form = next(
+            (item for item in parser.forms if item["name"] == "portadaForm"),
+            parser.forms[0] if parser.forms else None,
+        )
+        result["province_step"] = {
+            "madrid_found": bool(madrid_option),
+            "madrid_value": madrid_option["value"] if madrid_option else None,
+            "form_found": bool(form),
+            "submitted": False,
+            "stage": "not_submitted",
+        }
+        if response.ok and madrid_option and form:
+            action = urljoin(response.url, form.get("action") or response.url)
+            fields = list(parser.hidden_fields)
+            fields.append(("provincia", madrid_option["value"]))
+            # This is only the province-selection step; no identity data,
+            # office, appointment slot, or reservation details are sent.
+            next_response = session.post(
+                action,
+                data=fields,
+                headers={**headers, "Referer": response.url},
+                timeout=(8, 25),
+                allow_redirects=True,
+            )
+            next_parser, next_title = _parse_response(next_response)
+            result["province_step"].update({
+                "submitted": True,
+                "http_status": next_response.status_code,
+                "final_url": re.sub(
+                    r";jsessionid=[^?]+", "", next_response.url
+                ),
+                "page_title": next_title,
+                "stage": "province_post_response",
+                "selects": next_parser.selects,
+                "forms": [
+                    {**item, "action": re.sub(
+                        r";jsessionid=[^?]+", "", item.get("action", "")
+                    )}
+                    for item in next_parser.forms
+                ],
+                "buttons": next_parser.buttons,
+                "message_excerpt": re.sub(
+                    r"\\s+", " ", next_response.text
+                )[:2500],
+            })
+        result["forms"] = [
+            {**item, "action": re.sub(
+                r";jsessionid=[^?]+", "", item.get("action", "")
+            )}
+            for item in parser.forms
+        ]
         result["selects"] = parser.selects
         result["inputs"] = parser.inputs
         result["buttons"] = parser.buttons
@@ -225,6 +300,16 @@ def main() -> int:
             for s in report["selects"]
         ],
         "buttons": report["buttons"],
+        "province_step": {
+            "madrid_found": report.get("province_step", {}).get("madrid_found"),
+            "submitted": report.get("province_step", {}).get("submitted"),
+            "stage": report.get("province_step", {}).get("stage"),
+            "http_status": report.get("province_step", {}).get("http_status"),
+            "page_title": report.get("province_step", {}).get("page_title"),
+            "selects": report.get("province_step", {}).get("selects", []),
+            "buttons": report.get("province_step", {}).get("buttons", []),
+            "message_excerpt": report.get("province_step", {}).get("message_excerpt", ""),
+        },
         "script_inspection": report["script_inspection"],
         "error": report["error"],
     }, ensure_ascii=False, indent=2))
