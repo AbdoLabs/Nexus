@@ -67,7 +67,7 @@ def extract_office_options(frames: list[dict[str, Any]]) -> list[str]:
 
 def classify_portal_result(frames: list[dict[str, Any]], text: str) -> str:
     """Classify explicit no-slot text or the office chooser shown after a broad search."""
-    normalized = re.sub(r"\\s+", " ", text or "").casefold()
+    normalized = re.sub(r"\s+", " ", text or "").casefold()
     if any(pattern in normalized for pattern in CHALLENGE_PATTERNS):
         return "manual_intervention_required"
     if any(pattern in normalized for pattern in NO_APPOINTMENT_PATTERNS):
