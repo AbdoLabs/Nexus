@@ -21,6 +21,7 @@ class Settings:
     telegram_bot_token: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     telegram_chat_id: str = os.getenv("TELEGRAM_CHAT_ID", "")
     province: str = os.getenv("PROVINCE", "Madrid")
+    office_selection: str = os.getenv("OFFICE_SELECTION", "Cualquier oficina")
     appointment_procedure: str = os.getenv(
         "APPOINTMENT_PROCEDURE",
         "POLICIA - TOMA DE HUELLA (EXPEDICIÓN DE TARJETA), "
