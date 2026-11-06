@@ -40,20 +40,6 @@ NO_APPOINTMENT_PATTERNS = (
 )
 
 
-def classify_visible_text(text: str) -> str:
-    """Classify visible portal state without interpreting ambiguous errors as availability."""
-    normalized = re.sub(r"\s+", " ", text or "").casefold()
-    if any(pattern in normalized for pattern in CHALLENGE_PATTERNS):
-        return "manual_intervention_required"
-    if any(pattern in normalized for pattern in NO_APPOINTMENT_PATTERNS):
-        return "no_appointments_message"
-    if "internet cita previa" in normalized or "cita previa" in normalized:
-        return "appointment_portal_loaded"
-    return "unknown_or_loading"
-
-
-
-
 def extract_office_options(frames: list[dict[str, Any]]) -> list[str]:
     """Extract choices from a visible office selector, if the portal shows one."""
     options: list[str] = []
