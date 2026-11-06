@@ -1,10 +1,10 @@
-name: Portal Form Probe
+name: ICP+ Route Probe
 
 on:
   push:
     branches: [main]
     paths:
-      - src/nexus/config.py
+      - .github/workflows/portal-probe.yml
   workflow_dispatch:
 
 permissions:
@@ -40,13 +40,13 @@ jobs:
           APP_ENV: production
           LOG_LEVEL: INFO
           TIMEZONE: Europe/Madrid
-        run: python -m nexus.portal_probe
+        run: python -m nexus.route_probe
 
       - name: Upload diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-portal-probe
+          name: nexus-route-probe
           path: artifacts/
           if-no-files-found: warn
           retention-days: 5
