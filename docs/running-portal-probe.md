@@ -1,35 +1,24 @@
-# Running the portal form probe
+# Portal form probe
 
-The first live inspection uses the alternate SSWEB ICP+ endpoint. The diagnostic reads form structure only; it does not submit personal details or select a time. It opens the official portal
-once, reads the initial form structure and visible text, and uploads a diagnostic
-artifact. It does not enter identity data or submit a reservation.
+The diagnostic reaches the public ICP+ form and submits the Madrid province
+selection only. It keeps hidden form fields and cookies in memory for the single
+HTTP session; it does not save them in the report or repository.
 
-## Steps
+It does not submit a person's identity information, select a police office,
+select a time slot, reserve, or cancel an appointment.
+
+## Run
 
 1. Open the [Portal Form Probe workflow](https://github.com/AbdoLabs/Nexus/actions/workflows/portal-probe.yml).
-2. Choose **Run workflow**, keep branch `main`, and confirm **Run workflow**.
-3. Wait for the run to finish.
-4. Open the completed run and download the artifact named `nexus-portal-probe`.
-5. Share the downloaded ZIP or the `portal_probe.json` report.
+2. Choose **Run workflow** on branch `main`.
+3. Download the `nexus-http-inspection` artifact from the completed run.
 
-## Interpreting the report
+## What to inspect
 
-- `appointment_portal_loaded`: the portal loaded; review the select controls
-  and option labels in the report to implement the next step.
-- `no_appointments_message`: the visible page showed an explicit no-appointments
-  message. This is not inferred from a generic error.
-- `manual_intervention_required`: the page displayed a CAPTCHA or access-control
-  challenge. Nexus stops; it does not attempt to solve or bypass it.
-- `unknown_or_loading`, `http_error`, or `navigation_error`: the portal
-  response needs inspection before implementing any interaction.
+The report includes the procedure selector and its public option labels after
+the Madrid-only form transition. The next implementation step can then identify
+the exact TIE fingerprint procedure option. Only after confirming that option
+will we submit that procedure and inspect the next screen for the office list
+or an explicit no-appointments message.
 
-The workflow is manual-only at this stage. Do not enable frequent polling until
-we have confirmed the portal's actual form flow and a reasonable request rate.
-
-
-## Current form discovery
-
-The initial page exposes a province selector and an Aceptar control. The read-only inspector records the Madrid option and inspects the public static scripts for the follow-on navigation logic; no personal information or booking data is submitted.
-
-
-Script diagnostics were refined to omit session identifiers and hidden input values.
+No office is selected by this diagnostic.
